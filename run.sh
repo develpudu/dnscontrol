@@ -19,7 +19,11 @@ case $1 in
     echo "--> ip.json actualizado"
     echo "--> Actualizando lista de dominios"
     auth=`jq -r '.desec."auth-token"' creds.json`
-    curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
+    # Fix para error de ssl ... no es lo mejor
+    if curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth" | grep -q 'curl: (60)'; then
+        # insecure
+        curl -o domains.json -X -k GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
+    fi    
     echo "--> domains.json actualizado"
     echo "--> Actualizando DNS con nueva IP"
     docker-compose run --rm dnscontrol dnscontrol preview
@@ -30,7 +34,11 @@ case $1 in
     domains)
     echo "--> Actualizando lista de dominios"
     auth=`jq -r '.desec."auth-token"' creds.json`
-    curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
+    # Fix para error de ssl ... no es lo mejor
+    if curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth" | grep -q 'curl: (60)'; then
+        # insecure
+        curl -o domains.json -X -k GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
+    fi 
     echo "--> domains.json actualizado"
     ;;
     token)
