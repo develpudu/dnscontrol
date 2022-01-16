@@ -19,13 +19,8 @@ case $1 in
     echo "--> ip.json actualizado"
     echo "--> Actualizando lista de dominios"
     auth=`jq -r '.desec."auth-token"' creds.json`
-    if curl -v --silent https://desec.io/api/v1/domains/ 2>&1 | grep -q expired; then
-        # insecure
-        curl -o domains.json -X -k GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
-    else
-        # secure
-        curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
-    fi    
+    # FIXME: Usamos -k x tema de ssl
+    curl -o domains.json -k -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
     echo "--> domains.json actualizado"
     echo "--> Actualizando DNS con nueva IP"
     docker-compose run --rm dnscontrol dnscontrol preview
@@ -36,11 +31,11 @@ case $1 in
     domains)
     echo "--> Actualizando lista de dominios"
     auth=`jq -r '.desec."auth-token"' creds.json`
-    if curl -v --silent https://desec.io/api/v1/domains/ 2>&1 | grep -q expired; then
-        # insecure
-        curl -o domains.json -X -k GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
+    # FIXME: Usamos -k x tema de ssl
+    ssl= curl -v --silent https://desec.io/api/v1/domains/ 2>&1 | sed -n '/expired/p' # no logro hacer q funciones asi que queda x defecto con -k
+    if [[ -z $ssl ]]; then
+        curl -o domains.json -k -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
     else
-        # secure
         curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
     fi 
     echo "--> domains.json actualizado"
