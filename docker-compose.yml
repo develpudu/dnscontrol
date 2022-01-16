@@ -1,0 +1,7 @@
+version: '3'
+services:
+    dnscontrol:
+        image: stackexchange/dnscontrol
+        container_name: dnscontrol
+        volumes:
+            - ./:/dns/
