@@ -16,9 +16,9 @@ case $1 in
 
     echo "--> domains.json actualizado"
     echo "--> Actualizando DNS con nueva IP"
-    docker-compose run dnscontrol dnscontrol preview
+    docker-compose run --rm dnscontrol dnscontrol preview
     echo "--> Aplicando los cambios a deSEC"
-    docker-compose run dnscontrol dnscontrol push
+    docker-compose run --rm dnscontrol dnscontrol push
     echo "DNS de dominios actualizados"
     ;;
     domains)
