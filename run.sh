@@ -7,7 +7,37 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 case $1 in
+    setup)
+    if [ -f "creds.json" ]; then
+        echo "--> Ya existe el archivo de credenciales"
+        while true; do
+            read -p "Actualizar el archivo: (y/n)" yn
+            case $yn in
+                [Yy]*) 
+                read -p "--> Token de deSEC: " TOKEN
+                cp creds-deSEC.json creds.json
+                sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
+                echo "--> Ejecute ./run.sh update para actualizar los dns."
+                break
+                ;;
+                [Nn]*) 
+                exit
+                ;;
+                *) echo "Opciones validas (y/n)";;
+            esac
+        done
+    else
+        cp creds-deSEC.json creds.json
+        read -p "--> Token de deSEC: " TOKEN
+        sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
+    fi    
+    ;;
     update)
+    if [ ! -f "creds.json" ]; then
+        echo "--> No existe el archivo de credenciales"
+        echo "--> Ejecute el ./run.sh setup"
+        exit 1
+    fi
     echo "--> Actulizando IP publica"
     curl -o ip.json 'https://api.ipgeolocation.io/getip'
     echo "--> ip.json actualizado"
@@ -42,6 +72,7 @@ case $1 in
     docker-compose run --rm dnscontrol sh
     ;;
     help)
+    echo "./run.sh setup: Crea el archivo creds.json con credenciales de deSEC"
     echo "./run.sh update: Actualiza la IP publica y los DNS de los dominios"
     echo "./run.sh domains: Actualiza la lista de dominios"
     echo "./run.sh token: Muestra el token de autenticacion"

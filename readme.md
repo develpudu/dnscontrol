@@ -7,16 +7,16 @@
 curl -sS https://webinstall.dev/jq | bash
 ```
 * Ejecutar como root o que el user pueda usar docker sin sudo
+* Token de acceso de deSEC
 ## Uso
 * Cloran el repositorio
 ```bash
 git clone https://github.com/develpudu/dnscontrol
 cd dnscontrol
 ```
-* Copiar/Renombrar creds-deSEC.json a creds.json y en "auth-token" agregar el token de deSEC
+* Ejecutar setup y agregar el token de deSEC
 ```bash
-cp creds-deSEC.json creds.json
-sed -i 's/auth-token": ""/auth-token": "TOKEN"/g' creds.json
+./run.sh setup
 ```
 * Ejecutar para actualizar la IP publica de todos los dominios:
 ```bash
