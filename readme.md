@@ -18,10 +18,6 @@ cd dnscontrol
 cp creds-deSEC.json creds.json
 sed -i 's/auth-token": ""/auth-token": "TOKEN"/g' creds.json
 ```
-* Ejecutar para generar el contenedor:
-```bash
-./run.sh setup
-```
 * Ejecutar para actualizar la IP publica de todos los dominios:
 ```bash
 ./run.sh update

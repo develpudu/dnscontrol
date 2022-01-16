@@ -7,12 +7,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 case $1 in
-    setup)
-    # Creamos el contenedor con docker-compose
-    echo "--> Creando contenedor"
-    docker-compose up -d
-    echo "--> Contenedor creado. Ejecutar: ./run.sh update para actualizar los dns de los dominios."
-    ;;
     update)
     echo "--> Actulizando IP publica"
     curl -o ip.json 'https://api.ipgeolocation.io/getip'
@@ -48,7 +42,6 @@ case $1 in
     docker-compose run --rm dnscontrol sh
     ;;
     help)
-    echo "./run.sh setup: Crea el contenedor con docker-compose"
     echo "./run.sh update: Actualiza la IP publica y los DNS de los dominios"
     echo "./run.sh domains: Actualiza la lista de dominios"
     echo "./run.sh token: Muestra el token de autenticacion"
