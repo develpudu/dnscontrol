@@ -1,5 +1,10 @@
 #!/bin/bash
+#
 # Ejecutar como root o que el user pueda usar docker sin sudo
+if [[ $EUID -ne 0 ]]; then
+   echo "Este script se debe ejecutar como root o sudoer" 1>&2
+   exit 1
+fi
 
 case $1 in
     setup)
@@ -13,7 +18,8 @@ case $1 in
     curl -o ip.json 'https://api.ipgeolocation.io/getip'
     echo "--> ip.json actualizado"
     echo "--> Actualizando lista de dominios"
-
+    auth=`jq -r '.desec."auth-token"' creds.json`
+    curl -o domains.json -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
     echo "--> domains.json actualizado"
     echo "--> Actualizando DNS con nueva IP"
     docker-compose run --rm dnscontrol dnscontrol preview
@@ -32,7 +38,7 @@ case $1 in
     echo "--> Token: $auth"
     ;;
     terminal)
-    docker-compose run dnscontrol bash
+    docker-compose run --rm dnscontrol sh
     ;;
     help)
     echo "./run.sh setup: Crea el contenedor con docker-compose"
