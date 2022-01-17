@@ -1,6 +1,11 @@
 #!/bin/bash
 #
 # Ejecutar como root o que el user pueda usar docker sin sudo
+#!/bin/bash
+
+CURRENT=`pwd`
+BASENAME="$CURRENT"
+
 if [[ $EUID -ne 0 ]]; then
    echo "Este script se debe ejecutar como root o sudoer" 1>&2
    exit 1
@@ -17,6 +22,8 @@ case $1 in
                 read -p "--> Token de deSEC: " TOKEN
                 cp creds-deSEC.json creds.json
                 sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
+		sed -i 's','dir_install',''$CURRENT'','g' dnscontrol.crontab
+		crontab -u root dnscontrol.crontab
                 echo "--> Ejecute ./run.sh update para actualizar los dns."
                 break
                 ;;
@@ -30,6 +37,9 @@ case $1 in
         cp creds-deSEC.json creds.json
         read -p "--> Token de deSEC: " TOKEN
         sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
+	sed -i 's','dir_install',''$CURRENT'','g' dnscontrol.crontab
+        crontab -u root dnscontrol.crontab
+        echo "--> Ejecute ./run.sh update para actualizar los dns."
     fi    
     ;;
     update)

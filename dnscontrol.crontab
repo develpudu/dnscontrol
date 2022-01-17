@@ -1,0 +1,1 @@
+30 7 * * *  /home/iamunoz/dnscontrol/run.sh update >> /home/iamunoz/dnscontrol/dnscontrol.log 2>&1
