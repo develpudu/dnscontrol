@@ -22,7 +22,7 @@ case $1 in
                 read -p "--> Token de deSEC: " TOKEN
                 cp creds-deSEC.json creds.json
                 sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
-		sed -i 's','dir_install',''$CURRENT'','g' dnscontrol.crontab
+		sed -i 's','install_path',''$CURRENT'','g' dnscontrol.crontab
 		crontab -u root dnscontrol.crontab
                 echo "--> Ejecute ./run.sh update para actualizar los dns."
                 break
@@ -37,7 +37,7 @@ case $1 in
         cp creds-deSEC.json creds.json
         read -p "--> Token de deSEC: " TOKEN
         sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
-	sed -i 's','dir_install',''$CURRENT'','g' dnscontrol.crontab
+	sed -i 's','install_path',''$CURRENT'','g' dnscontrol.crontab
         crontab -u root dnscontrol.crontab
         echo "--> Ejecute ./run.sh update para actualizar los dns."
     fi    
