@@ -9,7 +9,7 @@ curl -sS https://webinstall.dev/jq | bash
 * Ejecutar como root o que el user pueda usar docker sin sudo
 * Token de acceso de deSEC
 ## Uso
-* Cloran el repositorio
+* Clonar el repositorio
 ```bash
 git clone https://github.com/develpudu/dnscontrol
 cd dnscontrol
