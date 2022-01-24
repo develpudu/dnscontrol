@@ -1,4 +1,6 @@
+config.json
 creds.json
 domains.json
 ip.json
 dnscontrol.crontab
+dnscontrol.log
