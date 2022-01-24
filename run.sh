@@ -1,18 +1,25 @@
 #!/bin/bash
 #
-# Ejecutar como root o que el user pueda usar docker sin sudo
-#!/bin/bash
+VERSION="0.7.0"
+RUN_PATH=$(dirname "$BASH_SOURCE")
+LOG_FILE=$RUN_PATH/dnscontrol.log
 
-CURRENT=`pwd`
-BASENAME="$CURRENT"
-
-if [[ $EUID -ne 0 ]]; then
-   echo "Este script se debe ejecutar como root o sudoer" 1>&2
-   exit 1
-fi
+logger(){
+    if [ $# -eq 0 ]
+    then cat - | while read -r message
+        do
+            echo "$(date +"[%F %T %Z] -") $message" | tee -a $LOG_FILE
+        done
+    else
+        echo -n "$(date +'[%F %T %Z]') - " | tee -a $LOG_FILE
+        echo $* | tee -a $LOG_FILE
+    fi
+}
 
 case $1 in
     setup)
+    cd "$RUN_PATH"
+    # TODO: Agregar que descargue la ultima version de dnscontrol desde git
     if [ -f "creds.json" ]; then
         echo "--> Ya existe el archivo de credenciales"
         while true; do
@@ -20,10 +27,10 @@ case $1 in
             case $yn in
                 [Yy]*) 
                 read -p "--> Token de deSEC: " TOKEN
-                cp creds-deSEC.json creds.json
-                sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
-		sed -i 's','install_path',''$CURRENT'','g' dnscontrol.crontab
-		crontab -u root dnscontrol.crontab
+                cp creds.dist.json creds.json
+                cp config.dist.json config.json
+                sed -i 's','auth-token": ""','auth-token": "'$TOKEN'"','g' creds.json
+                sed -i 's','install_path": ""','install_path": "'$RUN_PATH'"','g' config.json
                 echo "--> Ejecute ./run.sh update para actualizar los dns."
                 break
                 ;;
@@ -34,15 +41,21 @@ case $1 in
             esac
         done
     else
-        cp creds-deSEC.json creds.json
+        cp creds.dist.json creds.json
+        cp config.dist.json config.json
         read -p "--> Token de deSEC: " TOKEN
-        sed -i 's/auth-token": ""/auth-token": "'$TOKEN'"/g' creds.json
-	sed -i 's','install_path',''$CURRENT'','g' dnscontrol.crontab
-        crontab -u root dnscontrol.crontab
+        sed -i 's','auth-token": ""','auth-token": "'$TOKEN'"','g' creds.json
+        sed -i 's','install_path": ""','install_path": "'$RUN_PATH'"','g' config.json
         echo "--> Ejecute ./run.sh update para actualizar los dns."
-    fi    
+    fi
+    if [ "$2" == "auto" ]; then
+        sed -i 's','install_path',''$RUN_PATH'','g' dnscontrol.crontab
+        crontab -u $USER dnscontrol.crontab
+        echo "--> Se agrego dnscontrol.crontab a crontab"
+    fi
     ;;
     update)
+    cd "$RUN_PATH"
     if [ ! -f "creds.json" ]; then
         echo "--> No existe el archivo de credenciales"
         echo "--> Ejecute el ./run.sh setup"
@@ -57,9 +70,9 @@ case $1 in
     curl -o domains.json -k -X GET https://desec.io/api/v1/domains/ --header "Authorization: Token $auth"
     echo "--> domains.json actualizado"
     echo "--> Actualizando DNS con nueva IP"
-    docker-compose run --rm dnscontrol dnscontrol preview
+    ./dnscontrol preview
     echo "--> Aplicando los cambios a deSEC"
-    docker-compose run --rm dnscontrol dnscontrol push
+    ./dnscontrol push | logger
     echo "DNS de dominios actualizados"
     ;;
     domains)
@@ -75,18 +88,20 @@ case $1 in
     echo "--> domains.json actualizado"
     ;;
     token)
+    cd "$RUN_PATH"
     auth=`jq -r '.desec."auth-token"' creds.json`
     echo "--> Token: $auth"
     ;;
-    terminal)
-    docker-compose run --rm dnscontrol sh
-    ;;
+    version)
+    echo "--> Version: $VERSION"
+    ;;    
     help)
     echo "./run.sh setup: Crea el archivo creds.json con credenciales de deSEC"
+    echo "./run.sh setup auto: Crea el archivo creds.json con credenciales de deSEC y genera el crontab"
     echo "./run.sh update: Actualiza la IP publica y los DNS de los dominios"
     echo "./run.sh domains: Actualiza la lista de dominios"
     echo "./run.sh token: Muestra el token de autenticacion"
-    echo "./run.sh terminal: Abre una terminal en el contenedor"
+    echo "./run.sh version: Muestra la version"
     echo "./run.sh help: Muestra esta ayuda"
     ;;
     *)

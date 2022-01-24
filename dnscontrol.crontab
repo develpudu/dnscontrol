@@ -1,1 +1,1 @@
-30 7 * * *  install_path/run.sh update >> install_path/dnscontrol.log 2>&1
+30 7 * * *  install_path/run.sh update
